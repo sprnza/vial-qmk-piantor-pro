@@ -18,6 +18,7 @@
 //#define NO_ACTION_LAYER
 //#define NO_ACTION_TAPPING
 //#define NO_ACTION_ONESHOT
+#define TAPPING_TERM 180
 
 #define RP2040_BOOTLOADER_DOUBLE_TAP_RESET // Activates the double-tap behavior
 #define RP2040_BOOTLOADER_DOUBLE_TAP_RESET_TIMEOUT 1000U // Timeout window in ms in which the double tap can occur.
@@ -35,3 +36,5 @@
 #define MOUSEKEY_MAX_SPEED 7
 #define MOUSEKEY_TIME_TO_MAX 50
 #define MOUSEKEY_MOVE_DELTA 5
+
+#define MASTER_RIGHT

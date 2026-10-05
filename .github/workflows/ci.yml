@@ -43,6 +43,7 @@ jobs:
       id: build
       run: |
         git config --global --add safe.directory $(pwd)
+        python3 -m pip install -r requirements.txt
         if ! qmk mass-compile -j $(nproc) $(qmk find -km vial | sed "s/:vial$/:${KEYMAP}/");
           then
           echo "::error::$(ls -1 .build/failed.log.* | wc -l) keymaps failed to build. See logs and/or job summary for details."

@@ -52,6 +52,13 @@ jobs:
           exit 1
         fi
 
+    - name: Upload firmware
+      uses: actions/upload-artifact@v4
+      with:
+        name: piantor-pro-default
+        path: beekeeb_piantor_pro_default.uf2
+        if-no-files-found: error
+
     - name: Dump failure logs
       if: ${{ failure() && steps.build.conclusion == 'failure' }}
       run: |

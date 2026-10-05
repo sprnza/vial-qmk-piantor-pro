@@ -1,9 +1,2 @@
-# Install the necessary requirements
+# QMK CLI uses this file to recognize a firmware checkout.
 -r requirements.txt
-
-# Python development requirements
-nose2
-flake8
-pep8-naming
-pyflakes
-yapf

@@ -12,19 +12,6 @@ env:
 permissions: {}
 
 jobs:
-  check-uid:
-    name: Check Vial UIDs
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: (actions) Checkout Vial repo
-      uses: actions/checkout@v3
-      with:
-        persist-credentials: false
-
-    - name: Verify Vial UID is unique per-keyboard
-      run: python3 util/ci_vial_verify_uid.py
-
   build-default:
     name: Build Piantor Pro default firmware
     runs-on: ubuntu-latest
@@ -34,7 +21,7 @@ jobs:
       KEYMAP: default
 
     steps:
-    - name: (actions) Checkout Vial repo
+    - name: Checkout firmware
       uses: actions/checkout@v3
       with:
         persist-credentials: false
@@ -44,7 +31,7 @@ jobs:
       id: build
       run: |
         git config --global --add safe.directory $(pwd)
-        python3 -m pip install -r requirements.txt
+        /opt/uv/tools/qmk/bin/python3 -m pip install -r requirements.txt
         if ! qmk mass-compile -j "$(nproc)" "${KEYBOARD}:${KEYMAP}";
           then
           failure_count="$(find .build -maxdepth 1 -type f -name 'failed.log.*' 2>/dev/null | wc -l)"

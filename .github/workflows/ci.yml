@@ -26,10 +26,11 @@ jobs:
       run: python3 util/ci_vial_verify_uid.py
 
   build-default:
-    name: Build default keymaps for Vial
+    name: Build Piantor Pro default firmware
     runs-on: ubuntu-latest
     container: ghcr.io/qmk/qmk_cli
     env:
+      KEYBOARD: beekeeb/piantor_pro
       KEYMAP: default
 
     steps:
@@ -44,18 +45,7 @@ jobs:
       run: |
         git config --global --add safe.directory $(pwd)
         python3 -m pip install -r requirements.txt
-        if ! targets="$(qmk find -km vial)";
-          then
-          echo "::error::Unable to find Vial keymaps."
-          exit 1
-        fi
-        if [ -z "${targets}" ];
-          then
-          echo "::error::No Vial keymaps found."
-          exit 1
-        fi
-        targets="$(printf '%s\n' "${targets}" | sed "s/:vial$/:${KEYMAP}/")"
-        if ! qmk mass-compile -j "$(nproc)" ${targets};
+        if ! qmk mass-compile -j "$(nproc)" "${KEYBOARD}:${KEYMAP}";
           then
           failure_count="$(find .build -maxdepth 1 -type f -name 'failed.log.*' 2>/dev/null | wc -l)"
           echo "::error::${failure_count} keymaps failed to build. See logs and/or job summary for details."
@@ -74,43 +64,4 @@ jobs:
           printf '\n::group::%s\n%s\n::endgroup::\n' "${pretty_logname}" "$(sed "${REGEX_MAKE_OUTPUT}" < "${log}")"
           printf '\n<details>\n<summary>%s</summary>\n\n```\n%s\n```\n\n</details>\n' \
              "${pretty_logname}" "$(sed "${REGEX_MAKE_OUTPUT} ; ${REGEX_ANSI_COLOR}" < "${log}")" >> "${GITHUB_STEP_SUMMARY}"
-        done
-
-  build-vial:
-    name: Build Vial keymaps
-    runs-on: ubuntu-latest
-    container: ghcr.io/qmk/qmk_cli
-    env:
-      KEYMAP: vial
-
-    steps:
-    - name: (actions) Checkout Vial repo
-      uses: actions/checkout@v3
-      with:
-        persist-credentials: false
-        submodules: recursive
-
-    - name: Build
-      id: build
-      run: |
-        git config --global --add safe.directory $(pwd)
-        if ! qmk mass-compile -km "${KEYMAP}" -j "$(nproc)";
-          then
-          failure_count="$(find .build -maxdepth 1 -type f -name 'failed.log.*' 2>/dev/null | wc -l)"
-          echo "::error::${failure_count} keymaps failed to build. See logs and/or job summary for details."
-          exit 1
-        fi
-
-    - name: Dump failure logs
-      if: ${{ failure() && steps.build.conclusion == 'failure' }}
-      run: |
-        echo '### Failure logs' | tee -a "${GITHUB_STEP_SUMMARY}"
-
-        cd .build || exit 1
-        for log in failed.log.*; do
-          pretty_logname="$(echo "${log}" | sed "s/^failed\.log\.[0-9]\+\.// ; s/\.${KEYMAP}$//")"
-
-          printf '\n::group::%s\n%s\n::endgroup::\n' "${pretty_logname}" "$(sed "${REGEX_MAKE_OUTPUT}" < "${log}")"
-          printf '\n<details>\n<summary>%s</summary>\n\n```\n%s\n```\n\n</details>\n' \
-            "${pretty_logname}" "$(sed "${REGEX_MAKE_OUTPUT} ; ${REGEX_ANSI_COLOR}" < "${log}")" >> "${GITHUB_STEP_SUMMARY}"
         done

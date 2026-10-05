@@ -15,11 +15,16 @@ import qmk.keymap
 
 def _set_log_level(level):
     cli.acquire_lock()
-    old = cli.log_level
-    cli.log_level = level
-    cli.log.setLevel(level)
-    logging.root.setLevel(level)
-    cli.release_lock()
+    try:
+        # MILC 2 removed MILCInterface.log_level. The logger level is the
+        # authoritative value in both MILC 1.x and 2.x.
+        old = cli.log.level
+        if hasattr(cli, 'log_level'):
+            cli.log_level = level
+        cli.log.setLevel(level)
+        logging.root.setLevel(level)
+    finally:
+        cli.release_lock()
     return old
 
 

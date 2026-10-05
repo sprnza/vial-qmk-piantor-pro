@@ -44,9 +44,21 @@ jobs:
       run: |
         git config --global --add safe.directory $(pwd)
         python3 -m pip install -r requirements.txt
-        if ! qmk mass-compile -j $(nproc) $(qmk find -km vial | sed "s/:vial$/:${KEYMAP}/");
+        if ! targets="$(qmk find -km vial)";
           then
-          echo "::error::$(ls -1 .build/failed.log.* | wc -l) keymaps failed to build. See logs and/or job summary for details."
+          echo "::error::Unable to find Vial keymaps."
+          exit 1
+        fi
+        if [ -z "${targets}" ];
+          then
+          echo "::error::No Vial keymaps found."
+          exit 1
+        fi
+        targets="$(printf '%s\n' "${targets}" | sed "s/:vial$/:${KEYMAP}/")"
+        if ! qmk mass-compile -j "$(nproc)" ${targets};
+          then
+          failure_count="$(find .build -maxdepth 1 -type f -name 'failed.log.*' 2>/dev/null | wc -l)"
+          echo "::error::${failure_count} keymaps failed to build. See logs and/or job summary for details."
           exit 1
         fi
 
@@ -82,9 +94,10 @@ jobs:
       id: build
       run: |
         git config --global --add safe.directory $(pwd)
-        if ! qmk mass-compile -km "${KEYMAP}" -j $(nproc);
+        if ! qmk mass-compile -km "${KEYMAP}" -j "$(nproc)";
           then
-          echo "::error::$(ls -1 .build/failed.log.* | wc -l) keymaps failed to build. See logs and/or job summary for details."
+          failure_count="$(find .build -maxdepth 1 -type f -name 'failed.log.*' 2>/dev/null | wc -l)"
+          echo "::error::${failure_count} keymaps failed to build. See logs and/or job summary for details."
           exit 1
         fi
 

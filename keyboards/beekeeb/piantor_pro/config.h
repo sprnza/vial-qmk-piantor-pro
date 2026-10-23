@@ -18,7 +18,7 @@
 //#define NO_ACTION_LAYER
 //#define NO_ACTION_TAPPING
 //#define NO_ACTION_ONESHOT
-#define TAPPING_TERM 170
+#define TAPPING_TERM 160
 
 #define RP2040_BOOTLOADER_DOUBLE_TAP_RESET // Activates the double-tap behavior
 #define RP2040_BOOTLOADER_DOUBLE_TAP_RESET_TIMEOUT 1000U // Timeout window in ms in which the double tap can occur.
